@@ -1,11 +1,11 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 
@@ -13,13 +13,15 @@ import (
 )
 
 type dayPass struct {
-	DayCode string `json: "daycode"`
+	DayCode string `json:"daycode"`
 }
 
 func codeGen() string {
 	b := make([]byte, 4)
-	rand.Seed(time.Now().UnixNano())
-	rand.Read(b)
+	_, err := rand.Read(b)
+	if err != nil {
+		log.Println("daily code error:", err)
+	}
 	return hex.EncodeToString(b)
 }
 
@@ -71,10 +73,16 @@ func checkCodeHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if req.DayCode == currentCode {
-		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+		err := json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+		if err != nil {
+			log.Println("JSON Encoding error:", err)
+		}
 	} else {
 		w.WriteHeader(http.StatusUnauthorized)
-		json.NewEncoder(w).Encode(map[string]string{"status": "error"})
+		err := json.NewEncoder(w).Encode(map[string]string{"status": "error"})
+		if err != nil {
+			log.Println("JSON Encoding error:", err)
+		}
 	}
 }
 
