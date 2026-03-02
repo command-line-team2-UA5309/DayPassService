@@ -42,7 +42,7 @@ func codeRefresh() {
 		f.Close()
 
 		current := time.Now()
-		nextChange := time.Date(current.Year(), current.Month(), current.Day(), 0, 0, 0, 0, current.Location())
+		nextChange := time.Date(current.Year(), current.Month(), current.Day()+1, 0, 0, 0, 0, current.Location())
 		time.Sleep(nextChange.Sub(current))
 	}
 }
